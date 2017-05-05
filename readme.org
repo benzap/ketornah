@@ -1,0 +1,13 @@
+#+TITLE: Ketornah
+#+AUTHOR: Benjamin Zaporzan
+#+DATE: 2017-05-04
+#+EMAIL: benzaporzan@gmail.com
+#+LANGUAGE: en
+#+OPTIONS: H:2 num:t toc:t \n:nil ::t |:t ^:t f:t tex:t
+
+* Ketornah
+  Ketornah is a web application which provides a searchable index of
+  food items, and determines if the given item is keto friendly.
+
+* Resources
+  - [[https://www.ars.usda.gov/northeast-area/beltsville-md/beltsville-human-nutrition-research-center/nutrient-data-laboratory/docs/sr28-download-files/][USDA National Nutrient Database for Standard Reference]]
