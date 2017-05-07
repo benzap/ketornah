@@ -1,8 +1,9 @@
 #![allow(dead_code)]
 
 use std::env;
-use std::fs::File;
+use std::io::{self, BufReader};
 use std::io::prelude::*;
+use std::fs::File;
 
 // Represents pg.30 within SR28 Documentation
 // FOOD_DES.txt
@@ -73,6 +74,15 @@ struct WeightValue {
 
 fn read_food_descriptions(file_path: String) -> Vec<FoodDescription> {
     let v: Vec<FoodDescription> = Vec::new();
+    let file_handle = File::open(file_path).unwrap();
+    let buf_reader = BufReader::new(file_handle);
+    for line in buf_reader.lines() {
+        let line = match line {
+            Ok(val) => val,
+            Err(_) => continue,
+        };
+        println!("Line: {}", line);
+    }
     v
 }
 
@@ -80,9 +90,19 @@ fn main() {
     let default_folder_path = String::from("../unparsed_food_data");
 
     let arguments: Vec<String> = env::args().collect();
-    match arguments.len() {
-        1 => println!("No folder path provided, using default path: {}", default_folder_path),
-        2 => println!("One Argument: {}", arguments[1]),
-        _ => println!("ketornah-parser <folder path>"),
-    }
+    let folder_path: String = match arguments.len() {
+        1 => {
+            println!("No folder path provided, using default path: {}", default_folder_path);
+            default_folder_path
+        }
+        2 => {
+            println!("One Argument: {}", arguments[1]);
+            arguments[1].clone()
+        },
+        _ => panic!("ketornah-parser <folder path>"),
+    };
+    
+    let food_descriptions = read_food_descriptions(folder_path + "/FOOD_DES.txt");
+    
+
 }
