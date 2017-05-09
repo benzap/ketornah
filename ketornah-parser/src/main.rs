@@ -8,6 +8,8 @@ use std::env;
 use std::io::{BufReader};
 use std::io::prelude::*;
 use std::fs::File;
+use std::fs;
+use std::path::Path;
 use regex::Regex;
 use sqlite::{State, Connection, Value};
 
@@ -138,8 +140,13 @@ fn read_food_descriptions(file_path: String) -> Vec<FoodDescription> {
     v
 }
 
-fn get_database_connection() -> Connection {
-    sqlite::open("../foodsr28.sqlite").unwrap()
+fn get_database_connection(db_path: String) -> Connection {
+    if Path::new(&db_path.to_owned()).exists() {
+        println!("Deleting previous database: {}", db_path);
+        fs::remove_file(&db_path).unwrap_or(());
+    }
+
+    sqlite::open(&db_path).unwrap()
 }
 
 fn has_table(conn: &Connection, name: &str) -> bool {
@@ -327,7 +334,7 @@ fn insert_nutrient_data(conn: &Connection, nutrient_data: &Vec<NutrientData>) {
     for data in nutrient_data {
         statement.bind(1, data.food_databank_number as i64).unwrap();
         statement.bind(2, data.nutrient_identifier as i64).unwrap();
-        statement.bind(2, data.nutrient_value as f64).unwrap();
+        statement.bind(3, data.nutrient_value as f64).unwrap();
      
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();   
@@ -522,6 +529,7 @@ fn process_weights(conn: &Connection, full_path: String) {
 
 fn main() {
     let default_folder_path = String::from("../unparsed_food_data");
+    let default_db_path = String::from("../foodsr28.sqlite");
 
     let arguments: Vec<String> = env::args().collect();
     let folder_path: String = match arguments.len() {
@@ -529,14 +537,19 @@ fn main() {
             println!("No folder path provided, using default path: {}", default_folder_path);
             default_folder_path
         }
-        2 => {
-            println!("One Argument: {}", arguments[1]);
-            arguments[1].clone()
-        },
-        _ => panic!("ketornah-parser <folder path>"),
+        2 => arguments[1].clone(),
+        3 => arguments[1].clone(),
+        _ => panic!("ketornah-parser [input folder] [output database]"),
     };
-    
-    let conn = get_database_connection();
+
+    let db_path: String = match arguments.len() {
+        1 => default_db_path,
+        2 => default_db_path,
+        3 => arguments[2].clone(),
+        _ => panic!("Too many arguments"),
+    };
+
+    let conn = get_database_connection(db_path);
 
     let full_path = folder_path.clone() + "/FOOD_DES.txt";
     process_food_descriptions(&conn, full_path);
