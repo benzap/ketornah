@@ -211,6 +211,8 @@ fn insert_food_descriptions(conn: &Connection, food_descriptions: &Vec<FoodDescr
           ?,
           ?
         );").unwrap();
+
+    conn.execute("BEGIN TRANSACTION").unwrap();
     for food in food_descriptions {
         statement.bind(1, food.food_databank_number as i64).unwrap();
         statement.bind(2, food.food_group_category as i64).unwrap();
@@ -230,6 +232,7 @@ fn insert_food_descriptions(conn: &Connection, food_descriptions: &Vec<FoodDescr
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();
     }
+    conn.execute("END TRANSACTION").unwrap();
 }
 
 fn read_food_groups(file_path: String) -> Vec<FoodGroup> {
@@ -269,6 +272,7 @@ fn insert_food_groups(conn: &Connection, food_groups: &Vec<FoodGroup>) {
           ?, ?
         );").unwrap();
 
+    conn.execute("BEGIN TRANSACTION").unwrap();
     for group in food_groups {
         statement.bind(1, group.food_group_category as i64).unwrap();
         statement.bind(2, &Value::String(group.food_group_description.to_owned())).unwrap();
@@ -276,6 +280,7 @@ fn insert_food_groups(conn: &Connection, food_groups: &Vec<FoodGroup>) {
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();
     }
+    conn.execute("END TRANSACTION").unwrap();
 }
 
 fn read_nutrient_data(file_path: String) -> Vec<NutrientData> {
@@ -318,6 +323,7 @@ fn insert_nutrient_data(conn: &Connection, nutrient_data: &Vec<NutrientData>) {
           ?, ?, ?
         );").unwrap();
 
+    conn.execute("BEGIN TRANSACTION").unwrap();
     for data in nutrient_data {
         statement.bind(1, data.food_databank_number as i64).unwrap();
         statement.bind(2, data.nutrient_identifier as i64).unwrap();
@@ -326,6 +332,7 @@ fn insert_nutrient_data(conn: &Connection, nutrient_data: &Vec<NutrientData>) {
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();   
     }
+    conn.execute("END TRANSACTION").unwrap();
 }
 
 fn read_nutrient_definitions(file_path: String) -> Vec<NutrientDefinition> {
@@ -371,6 +378,7 @@ fn insert_nutrient_definitions(conn: &Connection, nutrient_definitions: &Vec<Nut
           ?, ?, ?, ?
         );").unwrap();
 
+    conn.execute("BEGIN TRANSACTION").unwrap();
     for data in nutrient_definitions {
         statement.bind(1, data.nutrient_identifier as i64).unwrap();
         statement.bind(2, &Value::String(data.units.to_owned())).unwrap();
@@ -380,6 +388,7 @@ fn insert_nutrient_definitions(conn: &Connection, nutrient_definitions: &Vec<Nut
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();   
     }
+    conn.execute("END TRANSACTION").unwrap();
 }
 
 fn read_weights(file_path: String) -> Vec<WeightValue> {
@@ -428,6 +437,7 @@ fn insert_weights(conn: &Connection, weights: &Vec<WeightValue>) {
           ?, ?, ?, ?, ?
         );").unwrap();
 
+    conn.execute("BEGIN TRANSACTION").unwrap();
     for data in weights {
         statement.bind(1, data.food_databank_number as i64).unwrap();
         statement.bind(2, data.sequence_number as i64).unwrap();
@@ -438,6 +448,7 @@ fn insert_weights(conn: &Connection, weights: &Vec<WeightValue>) {
         while let State::Row = statement.next().unwrap() {}
         statement.reset().unwrap();   
     }
+    conn.execute("END TRANSACTION").unwrap();
 }
 
 fn process_food_descriptions(conn: &Connection, full_path: String) {
