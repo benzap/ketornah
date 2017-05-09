@@ -5,7 +5,7 @@ extern crate sqlite;
 
 
 use std::env;
-use std::io::{BufReader, Lines};
+use std::io::{BufReader};
 use std::io::prelude::*;
 use std::fs::File;
 use regex::Regex;
@@ -67,7 +67,7 @@ struct NutrientData {
 // Represents pg.34 within SR28 Documentation
 // NUTR_DEF.txt
 #[derive(Debug)]
-struct NutrientDescription {
+struct NutrientDefinition {
     nutrient_identifier: i32, //Nutr_No [0]
     units: String, //Units [1]
     tagname: String, //Tagname [2]
@@ -179,8 +179,7 @@ fn create_food_description_table(conn: &Connection) {
 }
 
 fn insert_food_descriptions(conn: &Connection, food_descriptions: &Vec<FoodDescription>) {
-    for food in food_descriptions {
-        let mut statement = conn.prepare("
+    let mut statement = conn.prepare("
         INSERT INTO food_description (
           food_databank_number,
           food_group_category,
@@ -212,7 +211,7 @@ fn insert_food_descriptions(conn: &Connection, food_descriptions: &Vec<FoodDescr
           ?,
           ?
         );").unwrap();
-
+    for food in food_descriptions {
         statement.bind(1, food.food_databank_number as i64).unwrap();
         statement.bind(2, food.food_group_category as i64).unwrap();
         statement.bind(3, &Value::String(food.long_description.to_owned())).unwrap();
@@ -227,8 +226,9 @@ fn insert_food_descriptions(conn: &Connection, food_descriptions: &Vec<FoodDescr
         statement.bind(12, food.protein_factor as f64).unwrap();
         statement.bind(13, food.fat_factor as f64).unwrap();
         statement.bind(14, food.carbohydrate_factor as f64).unwrap();
-        
-        statement.next().unwrap();
+     
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();
     }
 }
 
@@ -249,6 +249,266 @@ fn read_food_groups(file_path: String) -> Vec<FoodGroup> {
     v
 }
 
+fn create_food_group_table(conn: &Connection) {
+    conn.execute("
+    CREATE TABLE food_group (
+      food_group_category INTEGER,
+      food_group_description TEXT,
+      FOREIGN KEY(food_group_category)
+        REFERENCES food_description(food_group_category)
+    );
+    ").unwrap();
+}
+
+fn insert_food_groups(conn: &Connection, food_groups: &Vec<FoodGroup>) {
+    let mut statement = conn.prepare("
+        INSERT INTO food_group (
+          food_group_category,
+          food_group_description
+        ) VALUES (
+          ?, ?
+        );").unwrap();
+
+    for group in food_groups {
+        statement.bind(1, group.food_group_category as i64).unwrap();
+        statement.bind(2, &Value::String(group.food_group_description.to_owned())).unwrap();
+        
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();
+    }
+}
+
+fn read_nutrient_data(file_path: String) -> Vec<NutrientData> {
+    let mut v: Vec<NutrientData> = Vec::new();
+    for line in get_lines_from_file(file_path) {
+        let line = match line {
+            Ok(val) => val,
+            Err(_) => continue,
+        };
+        let fields = parse_fields(line);
+        let nutrient_data = NutrientData {
+            food_databank_number: fields[0].parse().unwrap_or(0), 
+            nutrient_identifier: fields[1].parse().unwrap_or(0),
+            nutrient_value: fields[2].parse().unwrap_or(1.0),
+        };
+        v.push(nutrient_data);
+    }
+    v
+}
+
+fn create_nutrient_data_table(conn: &Connection) {
+    conn.execute("
+    CREATE TABLE nutrient_data (
+      food_databank_number INTEGER,
+      nutrient_identifier INTEGER,
+      nutrient_value REAL,
+      FOREIGN KEY(food_databank_number)
+        REFERENCES food_description(food_databank_number)
+    );
+    ").unwrap();
+}
+
+fn insert_nutrient_data(conn: &Connection, nutrient_data: &Vec<NutrientData>) {
+    let mut statement = conn.prepare("
+        INSERT INTO nutrient_data (
+          food_databank_number,
+          nutrient_identifier,
+          nutrient_value
+        ) VALUES (
+          ?, ?, ?
+        );").unwrap();
+
+    for data in nutrient_data {
+        statement.bind(1, data.food_databank_number as i64).unwrap();
+        statement.bind(2, data.nutrient_identifier as i64).unwrap();
+        statement.bind(2, data.nutrient_value as f64).unwrap();
+     
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();   
+    }
+}
+
+fn read_nutrient_definitions(file_path: String) -> Vec<NutrientDefinition> {
+    let mut v: Vec<NutrientDefinition> = Vec::new();
+    for line in get_lines_from_file(file_path) {
+        let line = match line {
+            Ok(val) => val,
+            Err(_) => continue,
+        };
+        let fields = parse_fields(line);
+        let nutrient_definition = NutrientDefinition {
+            nutrient_identifier: fields[0].parse().unwrap_or(0), 
+            units: fields[1].clone(),
+            tagname: fields[2].clone(),
+            description: fields[3].clone(),
+        };
+        v.push(nutrient_definition);
+    }
+    v
+}
+
+fn create_nutrient_definition_table(conn: &Connection) {
+    conn.execute("
+    CREATE TABLE nutrient_definition (
+      nutrient_identifier INTEGER,
+      units TEXT,
+      tagname TEXT,
+      description TEXT,
+      FOREIGN KEY(nutrient_identifier)
+        REFERENCES nutrient_data(nutrient_identifier)
+    );
+    ").unwrap();
+}
+
+fn insert_nutrient_definitions(conn: &Connection, nutrient_definitions: &Vec<NutrientDefinition>) {
+    let mut statement = conn.prepare("
+        INSERT INTO nutrient_definition (
+          nutrient_identifier,
+          units,
+          tagname,
+          description
+        ) VALUES (
+          ?, ?, ?, ?
+        );").unwrap();
+
+    for data in nutrient_definitions {
+        statement.bind(1, data.nutrient_identifier as i64).unwrap();
+        statement.bind(2, &Value::String(data.units.to_owned())).unwrap();
+        statement.bind(3, &Value::String(data.tagname.to_owned())).unwrap();
+        statement.bind(4, &Value::String(data.description.to_owned())).unwrap();
+     
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();   
+    }
+}
+
+fn read_weights(file_path: String) -> Vec<WeightValue> {
+    let mut v: Vec<WeightValue> = Vec::new();
+    for line in get_lines_from_file(file_path) {
+        let line = match line {
+            Ok(val) => val,
+            Err(_) => continue,
+        };
+        let fields = parse_fields(line);
+        let weight = WeightValue {
+            food_databank_number: fields[0].parse().unwrap_or(0), 
+            sequence_number: fields[1].parse().unwrap_or(0),
+            amount: fields[2].parse().unwrap_or(0),
+            measurement_description: fields[3].clone(),
+            gram_weight: fields[4].parse().unwrap_or(1.00),
+        };
+        v.push(weight);
+    }
+    v
+}
+
+fn create_weight_table(conn: &Connection) {
+    conn.execute("
+    CREATE TABLE weight (
+      food_databank_number INTEGER,
+      sequence_number INTEGER,
+      amount INTEGER,
+      measurement_description TEXT,
+      gram_weight REAL,
+      FOREIGN KEY(food_databank_number)
+        REFERENCES food_description(food_databank_number)
+    );
+    ").unwrap();
+}
+
+fn insert_weights(conn: &Connection, weights: &Vec<WeightValue>) {
+    let mut statement = conn.prepare("
+        INSERT INTO weight (
+          food_databank_number,
+          sequence_number,
+          amount,
+          measurement_description,
+          gram_weight
+        ) VALUES (
+          ?, ?, ?, ?, ?
+        );").unwrap();
+
+    for data in weights {
+        statement.bind(1, data.food_databank_number as i64).unwrap();
+        statement.bind(2, data.sequence_number as i64).unwrap();
+        statement.bind(3, data.amount as i64).unwrap();
+        statement.bind(4, &Value::String(data.measurement_description.to_owned())).unwrap();
+        statement.bind(5, data.gram_weight as f64).unwrap();
+     
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();   
+    }
+}
+
+fn process_food_descriptions(conn: &Connection, full_path: String) {
+    println!("Reading Food Descriptions from {}...", full_path);
+    let food_descriptions = read_food_descriptions(full_path);
+
+    // Create the food_description table
+    if !has_table(&conn, "food_description") {
+        println!("Creating Food Description table...");
+        create_food_description_table(&conn);
+    }
+    println!("Populating Food Descriptions...");
+    insert_food_descriptions(&conn, &food_descriptions);
+}
+
+fn process_food_groups(conn: &Connection, full_path: String) {
+    println!("Reading Food Groups from {}...", full_path);
+
+    let food_groups = read_food_groups(full_path);
+    
+    // Create food_group table
+    if !has_table(&conn, "food_group") {
+        println!("Creating Food Group table...");
+        create_food_group_table(&conn);
+    }
+    println!("Populating Food Groups...");
+    insert_food_groups(&conn, &food_groups);
+}
+
+fn process_nutrient_data(conn: &Connection, full_path: String) {
+    println!("Reading Nutrient Data from NUT_DATA.txt");
+    
+    let nutrient_data = read_nutrient_data(full_path);
+
+    // Create nutrient_data table
+    if !has_table(&conn, "nutrient_data") {
+        println!("Creating Nutrient Data table...");
+        create_nutrient_data_table(&conn);
+    }
+    println!("Populating Nutrient Data...");
+    insert_nutrient_data(&conn, &nutrient_data);
+}
+
+fn process_nutrient_definitions(conn: &Connection, full_path: String) {
+    println!("Reading Nutrient Definitions from NUTR_DEF.txt");
+    
+    let nutrient_definitions = read_nutrient_definitions(full_path);
+
+    // Create nutrient_definition table
+    if !has_table(&conn, "nutrient_definition") {
+        println!("Creating Nutrient Defintion table...");
+        create_nutrient_definition_table(&conn);
+    }
+    println!("Populating Nutrient Definitions...");
+    insert_nutrient_definitions(&conn, &nutrient_definitions);
+}
+
+fn process_weights(conn: &Connection, full_path: String) {
+    println!("Reading Nutrient Definitions from NUTR_DEF.txt");
+    
+    let weights = read_weights(full_path);
+
+    // Create weight table
+    if !has_table(&conn, "weight") {
+        println!("Creating Weight table...");
+        create_weight_table(&conn);
+    }
+    println!("Populating Weights...");
+    insert_weights(&conn, &weights);
+}
+
 fn main() {
     let default_folder_path = String::from("../unparsed_food_data");
 
@@ -266,23 +526,21 @@ fn main() {
     };
     
     let conn = get_database_connection();
-    
-    println!("Reading Food Descriptions from FOOD_DES.txt...");
+
     let full_path = folder_path.clone() + "/FOOD_DES.txt";
-    let food_descriptions = read_food_descriptions(full_path);
+    process_food_descriptions(&conn, full_path);
 
-    // Create the food_description table
-    if !has_table(&conn, "food_description") {
-        println!("Creating Food Description table...");
-        create_food_description_table(&conn);
-    }
-    println!("Populating Food Descriptions...");
-    insert_food_descriptions(&conn, &food_descriptions);
-
-    println!("Reading Food Groups from FD_GROUP.txt");
     let full_path = folder_path.clone() + "/FD_GROUP.txt";
-    let food_groups = read_food_groups(full_path);
-    println!("{:?}", &food_groups[0]);
+    process_food_groups(&conn, full_path);
+
+    let full_path = folder_path.clone() + "/NUT_DATA.txt";
+    process_nutrient_data(&conn, full_path);
+
+    let full_path = folder_path.clone() + "/NUTR_DEF.txt";
+    process_nutrient_definitions(&conn, full_path);
+
+    let full_path = folder_path.clone() + "/WEIGHT.txt";
+    process_weights(&conn, full_path);
 
     println!("Finished!");
 }
