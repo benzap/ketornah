@@ -17,7 +17,9 @@
                  [org.danielsz/system "0.4.0"]
                  [org.clojure/tools.namespace "0.2.11"]
                  [rum "0.10.8"]
-                 [lambdaisland/garden-watcher "0.3.1"]]
+                 [lambdaisland/garden-watcher "0.3.1"]
+                 [org.clojure/core.async "0.3.442"]
+                 [funcool/cuerdas "2.0.3"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-environ "1.1.0"]]

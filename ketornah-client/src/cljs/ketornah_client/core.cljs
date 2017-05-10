@@ -1,5 +1,6 @@
 (ns ketornah-client.core
   (:require [rum.core :as rum]
+            [ketornah-client.sql :as sql]
             [ketornah-client.component.search :refer [c-search]]
             [ketornah-client.component.result :refer [c-result]]))
 
