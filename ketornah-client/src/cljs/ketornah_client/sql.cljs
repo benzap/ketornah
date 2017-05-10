@@ -63,9 +63,10 @@
           (println result))))
 
 (def food-query
-  "")
+  "SELECT * FROM food_summary WHERE name LIKE ")
 
-(defn search-food [db name])
+(defn search-food [db name]
+  )
 
 #_(let [db-channel (open-database default-db-url)]
     (go (let [db (<! db-channel)
