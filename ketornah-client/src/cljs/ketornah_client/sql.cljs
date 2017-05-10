@@ -44,7 +44,7 @@
 
 (defn result-vector->result-map [columns value]
   (let [columns (map str/keyword columns)]
-    (->> (map (fn [col val] [col val]) columns value)
+    (->> (map #(vec [%1 %2]) columns value)
          flatten
          (apply hash-map))))
 
@@ -60,4 +60,14 @@
 #_(let [db-channel (open-database default-db-url)]
     (go (let [db (<! db-channel)
               result (execute-query db "SELECT * FROM food_group LIMIT 2;")]
+          (println result))))
+
+(def food-query
+  "")
+
+(defn search-food [db name])
+
+#_(let [db-channel (open-database default-db-url)]
+    (go (let [db (<! db-channel)
+              result (search-food db "peanut")]
           (println result))))

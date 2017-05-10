@@ -262,7 +262,7 @@ fn read_food_groups(file_path: String) -> Vec<FoodGroup> {
 fn create_food_group_table(conn: &Connection) {
     conn.execute("
     CREATE TABLE food_group (
-      food_group_category INTEGER,
+      food_group_category INTEGER PRIMARY KEY,
       food_group_description TEXT,
       FOREIGN KEY(food_group_category)
         REFERENCES food_description(food_group_category)
@@ -315,7 +315,8 @@ fn create_nutrient_data_table(conn: &Connection) {
       nutrient_identifier INTEGER,
       nutrient_value REAL,
       FOREIGN KEY(food_databank_number)
-        REFERENCES food_description(food_databank_number)
+        REFERENCES food_description(food_databank_number),
+      UNIQUE(food_databank_number, nutrient_identifier)
     );
     ").unwrap();
 }
@@ -364,7 +365,7 @@ fn read_nutrient_definitions(file_path: String) -> Vec<NutrientDefinition> {
 fn create_nutrient_definition_table(conn: &Connection) {
     conn.execute("
     CREATE TABLE nutrient_definition (
-      nutrient_identifier INTEGER,
+      nutrient_identifier INTEGER PRIMARY KEY,
       units TEXT,
       tagname TEXT,
       description TEXT,
@@ -427,7 +428,8 @@ fn create_weight_table(conn: &Connection) {
       measurement_description TEXT,
       gram_weight REAL,
       FOREIGN KEY(food_databank_number)
-        REFERENCES food_description(food_databank_number)
+        REFERENCES food_description(food_databank_number),
+      UNIQUE(food_databank_number, sequence_number)
     );
     ").unwrap();
 }
@@ -527,6 +529,66 @@ fn process_weights(conn: &Connection, full_path: String) {
     insert_weights(&conn, &weights);
 }
 
+fn generate_food_summary_view(conn: &Connection) {
+    println!("Generating food_summary View...");
+    let query = "
+CREATE VIEW IF NOT EXISTS food_summary AS
+WITH
+nutrient_carb AS (
+	SELECT NData.food_databank_number, NData.nutrient_value
+	FROM nutrient_data as NData
+	INNER JOIN nutrient_definition as NDef ON NData.nutrient_identifier = NDef.nutrient_identifier
+	WHERE NDef.tagname = 'CHOCDF'
+),
+nutrient_protein AS (
+	SELECT NData.food_databank_number, NData.nutrient_value
+	FROM nutrient_data as NData
+	INNER JOIN nutrient_definition as NDef ON NData.nutrient_identifier = NDef.nutrient_identifier
+	WHERE NDef.tagname = 'PROCNT'
+),
+nutrient_fat AS (
+	SELECT NData.food_databank_number, NData.nutrient_value
+	FROM nutrient_data as NData
+	INNER JOIN nutrient_definition as NDef ON NData.nutrient_identifier = NDef.nutrient_identifier
+	WHERE NDef.tagname = 'FAT'
+),
+nutrient_fibre AS (
+	SELECT NData.food_databank_number, NData.nutrient_value
+	FROM nutrient_data as NData
+	INNER JOIN nutrient_definition as NDef ON NData.nutrient_identifier = NDef.nutrient_identifier
+	WHERE NDef.tagname = 'FIBTG'
+)
+SELECT FD.long_description AS name,
+FG.food_group_description AS category,
+carb.nutrient_value AS carbs,
+protein.nutrient_value AS protein,
+fat.nutrient_value AS fat,
+fibre.nutrient_value AS fibre
+FROM food_description AS FD
+INNER JOIN food_group AS FG ON FG.food_group_category = FD.food_group_category
+INNER JOIN nutrient_carb AS carb ON carb.food_databank_number = FD.food_databank_number
+INNER JOIN nutrient_protein AS protein ON protein.food_databank_number = FD.food_databank_number
+INNER JOIN nutrient_fat AS fat ON fat.food_databank_number = FD.food_databank_number
+INNER JOIN nutrient_fibre AS fibre ON fibre.food_databank_number = FD.food_databank_number";
+    conn.execute(query).unwrap();
+}
+
+fn compress_database(conn: &Connection) {
+    println!("Compressing Database...");
+    let query = "
+WITH rejected_ids AS (
+	SELECT DISTINCT NData.nutrient_identifier AS id
+	FROM nutrient_data AS NData
+	INNER JOIN nutrient_definition AS NDef
+	  ON NData.nutrient_identifier = NDef.nutrient_identifier
+	WHERE NDef.tagname NOT IN ('CHOCDF', 'PROCNT', 'FAT', 'FIBTG', 'ENERC_KJ')
+)
+DELETE FROM nutrient_data WHERE nutrient_identifier IN (SELECT id FROM rejected_ids);";
+    conn.execute(query).unwrap();
+    println!("Vacuuming...");
+    conn.execute("VACUUM").unwrap();
+}
+
 fn main() {
     let default_folder_path = String::from("../unparsed_food_data");
     let default_db_path = String::from("../foodsr28.sqlite");
@@ -565,6 +627,9 @@ fn main() {
 
     let full_path = folder_path.clone() + "/WEIGHT.txt";
     process_weights(&conn, full_path);
+
+    compress_database(&conn);
+    generate_food_summary_view(&conn);
 
     println!("Finished!");
 }
