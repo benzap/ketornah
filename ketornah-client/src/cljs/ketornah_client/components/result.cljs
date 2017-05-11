@@ -1,6 +1,6 @@
 (ns ketornah-client.component.result
   (:require [rum.core :as rum]))
 
-(rum/defc c-result < rum/reactive 
-  []
+(rum/defcs c-result < rum/reactive 
+  [state app-state]
   [:div "Search Results"])
