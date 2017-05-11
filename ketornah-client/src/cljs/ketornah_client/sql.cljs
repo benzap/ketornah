@@ -63,12 +63,14 @@
           (println result))))
 
 (def food-query
-  "SELECT * FROM food_summary WHERE name LIKE ")
+  "SELECT * FROM food_summary WHERE name LIKE '%s'")
 
-(defn search-food [db name]
-  )
+(defn search-food [db search]
+  (let [search (str/replace (str "%" search "%") " " "%")
+        query (str/format food-query search)]
+    (execute-query db query)))
 
 #_(let [db-channel (open-database default-db-url)]
     (go (let [db (<! db-channel)
-              result (search-food db "peanut")]
+              result (search-food db "peanut oil")]
           (println result))))
