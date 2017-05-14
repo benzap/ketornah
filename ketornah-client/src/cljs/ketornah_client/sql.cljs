@@ -1,6 +1,7 @@
 (ns ketornah-client.sql
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
-  (:require [cljs.core.async :refer [chan put! <! >!]]
+  (:require [goog.functions]
+            [cljs.core.async :refer [chan put! <! >!]]
             [cuerdas.core :as str]))
 
 (def default-db-url "db/foodsr28.sqlite")
@@ -63,14 +64,21 @@
           (println result))))
 
 (def food-query
-  "SELECT * FROM food_summary WHERE name LIKE '%s'")
+  "SELECT * FROM food_summary WHERE name LIKE '%s' LIMIT 10")
+
+(def food-query-perf
+  "SELECT long_description AS name FROM food_description WHERE name LIKE '%s'")
 
 (defn search-food [db search]
+  (.log js/console "Loading search" search)
   (let [search (str/replace (str "%" search "%") #"\s+|[^a-zA-Z]+" "%")
         query (str/format food-query search)]
+    (.log js/console query)
     (execute-query db query)))
 
 #_(let [db-channel (open-database default-db-url)]
     (go (let [db (<! db-channel)
-              result (search-food db "peanut oil'")]
-          (println result))))
+              _ (.time js/console)
+              result (search-food db "peanut oil")
+              _ (.timeEnd js/console)]
+          (.log js/console "Result:" (clj->js result)))))

@@ -532,7 +532,7 @@ fn process_weights(conn: &Connection, full_path: String) {
 fn generate_food_summary_view(conn: &Connection) {
     println!("Generating food_summary View...");
     let query = "
-CREATE VIEW IF NOT EXISTS food_summary AS
+CREATE VIEW IF NOT EXISTS food_summary_view AS
 WITH
 nutrient_carb AS (
 	SELECT NData.food_databank_number, NData.nutrient_value
@@ -581,6 +581,8 @@ INNER JOIN nutrient_energy AS energy ON energy.food_databank_number = FD.food_da
 ";
     conn.execute(query).unwrap();
 }
+
+
 
 fn compress_database(conn: &Connection) {
     println!("Compressing Database...");
