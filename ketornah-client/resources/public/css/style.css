@@ -102,7 +102,13 @@ h1 {
 }
 
 .search-result-bar {
-  padding-left: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 5px;
+  padding-right: 0;
+  overflow: hidden;
 }
 
 .keto-index-fatbomb {

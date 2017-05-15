@@ -81,7 +81,13 @@
    {:display "flex"
     :padding (px 7)}]
   [:.search-result-bar
-   {:padding-left (px 3)}]
+   {:display "flex"
+    :flex-direction "column"
+    :justify-content "center"
+    :align-items "center"
+    :padding (px 5)
+    :padding-right 0
+    :overflow "hidden"}]
   [:.keto-index-fatbomb
    {:background-color (color/darken color-green 0)}]
   [:.keto-index-keto

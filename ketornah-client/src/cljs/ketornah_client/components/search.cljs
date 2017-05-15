@@ -7,20 +7,59 @@
             [ketornah-client.sql :as sql]
             [ketornah-client.food :as food]))
 
+(def bar-height 20)
+(def bar-excess-color "#64b5f6")
+(def bar-carbs-color "#ff8a65")
+(def bar-protein-color "#dce775")
+(def bar-fat-color "#fff176")
+
 (def mixin-render-result-bar
   {:did-mount
    (fn [state]
      (let [comp (:rum/react-component state)
-           dom-node (js/ReactDOM.findDOMNode comp)]
-       (-> js/d3
-           (.select dom-node)
-           (.select ".search-result-bar")
-           (.append "svg")
-           (.style "background-color" "white")
+           dom-node (js/ReactDOM.findDOMNode comp)
+           bar-element (.querySelector dom-node ".search-result-bar")
+           data-unparsed (.getAttribute bar-element "data-nutr-values")
+           [carbs protein fat] (str/split data-unparsed ",")
+           svg-element (-> js/d3 (.select bar-element) (.append "svg"))]
+
+       ;; Style svg element
+       (-> svg-element
+           (.style "background-color" bar-excess-color)
            (.style "border-radius" "5px")
+           (.style "border" "3px solid #1d1d1d")
            (.attr "width" "100%")
-           (.attr "height" "10px")
-           ))
+           (.attr "height" bar-height))
+
+       ;; Add Carbs bar
+       (-> svg-element
+           (.append "rect")
+           (.attr "x" 0)
+           (.attr "y" 0)
+           (.attr "width" (str carbs "%"))
+           (.attr "height" bar-height)
+           (.attr "fill" bar-carbs-color))
+
+       ;; Add Protein bar
+       (-> svg-element
+           (.append "rect")
+           (.attr "x" (str carbs "%"))
+           (.attr "y" 0)
+           (.attr "width" (str protein "%"))
+           (.attr "height" bar-height)
+           (.attr "fill" bar-protein-color))
+       
+       ;; Add Fat bar
+       (-> svg-element
+           (.append "rect")
+           (.attr "x" (str (+ (.parseFloat js/window carbs) (.parseFloat js/window protein)) "%"))
+           (.attr "y" 0)
+           (.attr "width" (str fat "%"))
+           (.attr "height" bar-height)
+           (.attr "fill" bar-fat-color))
+
+
+)
      state)})
 
 (defn update-food-search [app-state text]
