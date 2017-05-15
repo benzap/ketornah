@@ -63,14 +63,13 @@
                            :main ketornah-client.test-runner
                            :optimizations :none}}
 
-               {:id "min"
+               {:id "prod"
                 :source-paths ["src/cljs" "src/cljc"]
-                :jar true
                 :compiler {:main ketornah-client.core
-                           :output-to "resources/public/js/compiled/ketornah_client.js"
-                           :output-dir "target"
+                           :output-to "../dist/js/ketornah_client.js"
+                           :output-dir "../dist/out"
                            :source-map-timestamp true
-                           :optimizations :advanced
+                           :optimizations :simple
                            :pretty-print false}}]}
 
   ;; When running figwheel from nREPL, figwheel will read this configuration

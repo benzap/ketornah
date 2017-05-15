@@ -4,9 +4,9 @@
             [rum.core :as rum]
             [cljs.core.async :refer [chan put! <! >!]]
             [ketornah-client.sql :as sql]
-            [ketornah-client.component.search :refer [c-search]]
-            [ketornah-client.component.result :refer [c-result]]
-            [ketornah-client.component.loading :refer [c-loading]]))
+            [ketornah-client.components.search :refer [c-search]]
+            [ketornah-client.components.result :refer [c-result]]
+            [ketornah-client.components.loading :refer [c-loading]]))
 
 (enable-console-print!)
 

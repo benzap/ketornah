@@ -1,4 +1,4 @@
-(ns ketornah-client.component.search
+(ns ketornah-client.components.search
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.functions]
             [cljs.core.async :refer [chan put! <! >!]]

@@ -1,4 +1,4 @@
-(ns ketornah-client.component.loading
+(ns ketornah-client.components.loading
   (:require [rum.core :as rum]))
 
 (rum/defcs c-loading [state app-state]
