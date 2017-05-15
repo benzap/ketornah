@@ -64,16 +64,11 @@
           (println result))))
 
 (def food-query
-  "SELECT * FROM food_summary WHERE name LIKE '%s'")
-
-(def food-query-perf
-  "SELECT long_description AS name FROM food_description WHERE name LIKE '%s'")
+  "SELECT * FROM food_summary WHERE name LIKE '%s' ORDER BY name")
 
 (defn search-food [db search]
-  (.log js/console "Loading search" search)
   (let [search (str/replace (str "%" search "%") #"\s+|[^a-zA-Z]+" "%")
         query (str/format food-query search)]
-    (.log js/console query)
     (execute-query db query)))
 
 #_(let [db-channel (open-database default-db-url)]

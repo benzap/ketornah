@@ -15,7 +15,7 @@
    {:database nil
     :loading? true
     :querying? false
-    :search-text "Peanut Butter"
+    :search-text ""
     :search-items []
     :search-selected nil
     :worker-channel nil}))
