@@ -67,3 +67,23 @@ h1 {
   font-weight: bold;
   font-size: 14px;
 }
+
+.keto-index-fatbomb {
+  background-color: #b0ff93;
+}
+
+.keto-index-keto {
+  background-color: #e8ffe0;
+}
+
+.keto-index-mild {
+  background-color: #93e6ff;
+}
+
+.keto-index-danger {
+  background-color: #ffc4d5;
+}
+
+.keto-index-not-keto {
+  background-color: #ff789d;
+}

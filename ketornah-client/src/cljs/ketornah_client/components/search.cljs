@@ -3,7 +3,9 @@
   (:require [goog.functions]
             [cljs.core.async :refer [chan put! <! >!]]
             [rum.core :as rum]
-            [ketornah-client.sql :as sql]))
+            [cuerdas.core :as str]
+            [ketornah-client.sql :as sql]
+            [ketornah-client.food :as food]))
 
 (defn update-food-search [app-state]
   (let [{:keys [database search-text]} @app-state]
@@ -18,9 +20,13 @@
 (rum/defcs c-search-result <
   {:key-fn (fn [food] (str (:name food)))}
   [state {:keys [name carbs protein fat fibre] :as food}]
-  [:.search-result
-   [:.search-result-title name]
-   [:.search-result-values (str carbs " " protein " " fat " " fibre)]])
+  (let [{:keys [carbs protein fat]} (food/process-percent-ratios food)]
+    [:.search-result {:class (-> (food/process-keto-index food) str/kebab)}
+     [:.search-result-title name]
+     [:.search-result-values
+      [:.search-result-carbs (str (.toFixed carbs 1) "% Carbs")]
+      [:.search-result-protein (str (.toFixed protein 1) "% Protein")]
+      [:.search-result-fat (str (.toFixed fat 1) "% Fat")]]]))
 
 (rum/defcs c-search <
   rum/reactive
@@ -34,7 +40,8 @@
                :disabled querying?
                :on-change
                (fn [e]
-                 (let [text (-> e .-target .-value)]
+                 (let [text (-> e .-target .-value)
+                       text (if-not (str/ends-with? text " ") (str/title text) text)]
                    (swap! app-state assoc :search-text text)))
                :on-key-down
                (fn [e]

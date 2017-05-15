@@ -64,7 +64,7 @@
           (println result))))
 
 (def food-query
-  "SELECT * FROM food_summary WHERE name LIKE '%s' LIMIT 10")
+  "SELECT * FROM food_summary WHERE name LIKE '%s'")
 
 (def food-query-perf
   "SELECT long_description AS name FROM food_description WHERE name LIKE '%s'")

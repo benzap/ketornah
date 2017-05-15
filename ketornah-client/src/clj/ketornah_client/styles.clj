@@ -3,6 +3,10 @@
             [garden.units :refer [px]]
             [garden.color :as color :refer [rgb rgba]]))
 
+(def color-green (rgb 176 255 147))
+(def color-blue (rgb 147 230 255))
+(def color-red (rgb 255 120 157))
+
 (defstyles style
   [:*
    {:padding 0
@@ -49,4 +53,14 @@
     :margin (px 5)}]
   [:.search-result-title
    {:font-weight "bold"
-    :font-size (px 14)}])
+    :font-size (px 14)}]
+  [:.keto-index-fatbomb
+   {:background-color color-green}]
+  [:.keto-index-keto
+   {:background-color (color/lighten color-green 15)}]
+  [:.keto-index-mild
+   {:background-color color-blue}]
+  [:.keto-index-danger
+   {:background-color (color/lighten color-red 15)}]
+  [:.keto-index-not-keto
+   {:background-color color-red}])

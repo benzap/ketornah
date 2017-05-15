@@ -7,9 +7,12 @@
         p-protein (/ protein total)
         p-fat (/ fat total)
         p-net-carbs (/ ncarbs total)]
-    {:protein (.floor js/Math (* 100 p-protein))
-     :fat (.floor js/Math (* 100 p-fat))
-     :carbs (.floor js/Math (* 100 p-net-carbs))}))
+    {:protein-relative (.fround js/Math (* 100 p-protein))
+     :fat-relative (.fround js/Math (* 100 p-fat))
+     :carbs-relative (.fround js/Math (* 100 p-net-carbs))
+     :protein (.fround js/Math protein)
+     :fat (.fround js/Math fat)
+     :carbs (.fround js/Math ncarbs)}))
 
 #_(def test_food
   {:protein 5.32
@@ -18,3 +21,19 @@
    :fibre 9.30})
 
 #_(process-percent-ratios test_food)
+
+(defn process-keto-index [{:keys [protein fat fibre carbs] :as food}]
+  (let [{:keys [protein-relative fat-relative carbs-relative
+                protein fat carbs]} (process-percent-ratios food)]
+    (cond
+      (and (<= carbs 5) (>= fat-relative 80))
+      :keto-index-fatbomb
+      (<= carbs 10)
+      :keto-index-keto
+      (<= carbs 20)
+      :keto-index-mild
+      (<= carbs 30)
+      :keto-index-danger
+      :else
+      :keto-index-not-keto
+      )))
