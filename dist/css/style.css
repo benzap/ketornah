@@ -2,6 +2,7 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
+  color: #1d1d1d;
   font-family: 'Roboto', sans-serif;
 }
 
@@ -38,52 +39,107 @@ h1 {
 }
 
 .search-container {
-  width: 400px;
+  width: 100%;
 }
 
 .search-input {
+  display: flex;
+  align-content: center;
+  justify-content: center;
   margin-bottom: 13px;
 }
 
 .search-input>input {
-  width: 400px;
-  height: 50px;
-  font-size: 42px;
   text-align: center;
+  font-size: 42px;
+  width: 400px;
   outline-width: 0px;
+  border: none;
+  border-top: 1px solid #ddd;
   border-radius: 4px;
-  border: 1px solid #4d4d4d;
+  height: 50px;
+  border-bottom: 4px solid #4d4d4d;
+}
+
+.search-input>input:focus {
+  background-color: #f3f3f3;
+  border-top: 1px solid #aaa;
+  border-bottom: 4px solid #2d2d2d;
+}
+
+.search-results {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .search-result {
-  border: 1px solid black;
-  border-radius: 4px;
+  box-shadow: 0 5px 8px 0 rgba(0,0,0,0.2),0 7px 12px 0 rgba(0,0,0,0.3);
+  border-radius: 2px;
+  width: 400px;
   min-height: 80px;
   padding: 5px;
-  margin: 5px;
+  margin: 15px;
 }
 
 .search-result-title {
   font-weight: bold;
   font-size: 14px;
+  padding: 5px;
+}
+
+.search-result-category {
+  padding: 5px;
+  padding-left: 7px;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.search-result-values {
+  display: flex;
+  padding: 7px;
+}
+
+.search-result-bar {
+  padding-left: 3px;
 }
 
 .keto-index-fatbomb {
-  background-color: #b0ff93;
+  background-color: #8bc34a;
 }
 
 .keto-index-keto {
-  background-color: #e8ffe0;
+  background-color: #a4d070;
 }
 
 .keto-index-mild {
-  background-color: #93e6ff;
+  background-color: #039be5;
 }
 
 .keto-index-danger {
-  background-color: #ffc4d5;
+  background-color: #f8877f;
 }
 
 .keto-index-not-keto {
-  background-color: #ff789d;
+  background-color: #f32c1e;
+}
+
+#progress-loader {
+  font-size: 42px;
+}
+
+.progress-spinner {
+  font-size: 42px;
+}
+
+.search-no-results {
+  font-style: italic;
+  font-size: 90%;
+}
+
+.search-querying {
+  font-size: 42px;
+  font-style: italic;
+  font-weight: bold;
 }
