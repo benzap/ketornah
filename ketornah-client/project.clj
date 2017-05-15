@@ -66,7 +66,7 @@
                {:id "prod"
                 :source-paths ["src/cljs" "src/cljc"]
                 :compiler {:main ketornah-client.core
-                           :output-to "../dist/js/ketornah_client.js"
+                           :output-to "../dist/js/compiled/ketornah_client.js"
                            :output-dir "../dist/out"
                            :source-map-timestamp true
                            :optimizations :simple

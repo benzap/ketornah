@@ -1,1 +1,2 @@
 *.sqlite
+!dist/db/foodsr28.sqlite
