@@ -87,6 +87,18 @@ struct WeightValue {
     gram_weight: f32, //Gm_Wgt [4]
 }
 
+#[derive(Debug)]
+struct FoodSummary {
+    id: i32, //food_databank_number
+    name: String,
+    category: String,
+    carbs: f32,
+    protein: f32,
+    fat: f32,
+    fibre: f32,
+    energy: f32,
+}
+
 fn parse_field(field: &str) -> String {
     //let s = field.clone();
     lazy_static! {
@@ -460,6 +472,76 @@ fn insert_weights(conn: &Connection, weights: &Vec<WeightValue>) {
     conn.execute("END TRANSACTION").unwrap();
 }
 
+fn read_food_summaries(conn: &Connection) -> Vec<FoodSummary> {
+    let mut v: Vec<FoodSummary> = Vec::new();
+
+    let mut statement = conn.prepare("
+    SELECT * FROM food_summary_view
+    ").unwrap();
+
+    while let State::Row = statement.next().unwrap() {
+        let food_summary = FoodSummary {
+            id: statement.read::<i64>(0).unwrap() as i32,
+            name: statement.read::<String>(1).unwrap(),
+            category: statement.read::<String>(2).unwrap(),
+            carbs: statement.read::<f64>(3).unwrap() as f32,
+            protein: statement.read::<f64>(4).unwrap() as f32,
+            fat: statement.read::<f64>(5).unwrap() as f32,
+            fibre: statement.read::<f64>(6).unwrap() as f32,
+            energy: statement.read::<f64>(7).unwrap() as f32,
+        };
+        v.push(food_summary);
+    }
+    v
+}
+
+fn create_food_summary_table(conn: &Connection) {
+    conn.execute("
+    CREATE TABLE food_summary (
+      id INTEGER PRIMARY KEY,
+      name TEXT,
+      category TEXT,
+      carbs REAL,
+      protein REAL,
+      fat REAL,
+      fibre REAL,
+      energy REAL
+    );
+    ").unwrap();
+}
+
+fn insert_food_summaries(conn: &Connection, food_summaries: &Vec<FoodSummary>) {
+    let mut statement = conn.prepare("
+        INSERT INTO food_summary (
+          id,
+          name,
+          category,
+          carbs,
+          protein,
+          fat,
+          fibre,
+          energy
+        ) VALUES (
+          ?, ?, ?, ?, ?, ?, ?, ?
+        );").unwrap();
+
+    conn.execute("BEGIN TRANSACTION").unwrap();
+    for data in food_summaries {
+        statement.bind(1, data.id as i64).unwrap();
+        statement.bind(2, &Value::String(data.name.to_owned())).unwrap();
+        statement.bind(3, &Value::String(data.category.to_owned())).unwrap();
+        statement.bind(4, data.carbs as f64).unwrap();
+        statement.bind(5, data.protein as f64).unwrap();
+        statement.bind(6, data.fat as f64).unwrap();
+        statement.bind(7, data.fibre as f64).unwrap();
+        statement.bind(8, data.energy as f64).unwrap();
+     
+        while let State::Row = statement.next().unwrap() {}
+        statement.reset().unwrap();
+    }
+    conn.execute("END TRANSACTION").unwrap();
+}
+
 fn process_food_descriptions(conn: &Connection, full_path: String) {
     println!("Reading Food Descriptions from {}...", full_path);
     let food_descriptions = read_food_descriptions(full_path);
@@ -529,8 +611,22 @@ fn process_weights(conn: &Connection, full_path: String) {
     insert_weights(&conn, &weights);
 }
 
+fn process_food_summary(conn: &Connection) {
+    println!("Reading Food Summary View into table...");
+
+    let food_summaries = read_food_summaries(&conn);
+
+    // Create food_summary table
+    if !has_table(&conn, "food_summary") {
+        println!("Creating food_summary table...");
+        create_food_summary_table(&conn);
+    }
+    println!("Populating Food Summaries...");
+    insert_food_summaries(&conn, &food_summaries);
+}
+
 fn generate_food_summary_view(conn: &Connection) {
-    println!("Generating food_summary View...");
+    println!("Generating food_summary_view View...");
     let query = "
 CREATE VIEW IF NOT EXISTS food_summary_view AS
 WITH
@@ -564,7 +660,8 @@ nutrient_energy AS (
 	INNER JOIN nutrient_definition as NDef ON NData.nutrient_identifier = NDef.nutrient_identifier
 	WHERE NDef.tagname = 'ENERC_KJ'
 )
-SELECT FD.long_description AS name,
+SELECT FD.food_databank_number AS id,
+FD.long_description AS name,
 FG.food_group_description AS category,
 carb.nutrient_value AS carbs,
 protein.nutrient_value AS protein,
@@ -584,8 +681,8 @@ INNER JOIN nutrient_energy AS energy ON energy.food_databank_number = FD.food_da
 
 
 
-fn compress_database(conn: &Connection) {
-    println!("Compressing Database...");
+fn compress_nutrient_table(conn: &Connection) {
+    println!("Compressing Nutrient Data Table...");
     let query = "
 WITH rejected_ids AS (
 	SELECT DISTINCT NData.nutrient_identifier AS id
@@ -596,8 +693,20 @@ WITH rejected_ids AS (
 )
 DELETE FROM nutrient_data WHERE nutrient_identifier IN (SELECT id FROM rejected_ids);";
     conn.execute(query).unwrap();
+}
+
+fn vacuum_database(conn: &Connection) {
     println!("Vacuuming...");
     conn.execute("VACUUM").unwrap();
+}
+
+fn compress_database(conn: &Connection) {
+    println!("Compressing Database...");
+    conn.execute("DROP VIEW food_summary_view").unwrap();
+    conn.execute("DROP TABLE nutrient_definition").unwrap();
+    conn.execute("DROP TABLE nutrient_data").unwrap();
+    conn.execute("DROP TABLE food_group").unwrap();
+    conn.execute("DROP TABLE food_description").unwrap();
 }
 
 fn main() {
@@ -639,8 +748,11 @@ fn main() {
     let full_path = folder_path.clone() + "/WEIGHT.txt";
     process_weights(&conn, full_path);
 
-    compress_database(&conn);
+    compress_nutrient_table(&conn);
     generate_food_summary_view(&conn);
+    process_food_summary(&conn);
+    compress_database(&conn);
+    vacuum_database(&conn);
 
     println!("Finished!");
 }
