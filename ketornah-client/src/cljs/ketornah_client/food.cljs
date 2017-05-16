@@ -26,13 +26,13 @@
   (let [{:keys [protein-relative fat-relative carbs-relative
                 protein fat carbs]} (process-percent-ratios food)]
     (cond
-      (and (<= carbs 5) (>= fat-relative 80))
+      (and (<= carbs 3))
       :keto-index-fatbomb
-      (<= carbs 10)
+      (<= carbs 7)
       :keto-index-keto
-      (<= carbs 20)
+      (<= carbs 15)
       :keto-index-mild
-      (<= carbs 30)
+      (<= carbs 20)
       :keto-index-danger
       :else
       :keto-index-not-keto

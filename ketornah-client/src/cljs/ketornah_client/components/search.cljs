@@ -5,7 +5,8 @@
             [rum.core :as rum]
             [cuerdas.core :as str]
             [ketornah-client.sql :as sql]
-            [ketornah-client.food :as food]))
+            [ketornah-client.food :as food]
+            [ketornah-client.search :as search]))
 
 (def bar-height 20)
 (def bar-excess-color "#64b5f6")
@@ -68,7 +69,8 @@
     (.setTimeout js/window
                  (fn []
                    (.time js/console "Search Query")
-                   (swap! app-state merge {:search-items (sql/search-food database text)
+                   (swap! app-state merge {:search-items (-> (sql/search-food database text)
+                                                             (search/process-costs text))
                                            :querying? false})
                    (.timeEnd js/console "Search Query")) 500)))
 
