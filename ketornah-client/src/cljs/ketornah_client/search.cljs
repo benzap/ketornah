@@ -2,7 +2,7 @@
   (:require [cuerdas.core :as str]
             [clojure.string :refer [index-of]]
             [ketornah-client.sql :as sql]
-            [ketornah-client.utils :refer [wait-for-database]]))
+            [ketornah-client.utils :refer [wait-for-database set-title!]]))
 
 (defn init-food-cost [food]
   (assoc food :cost 1.0))
@@ -76,6 +76,7 @@
 #_(process-costs [{:name "Beans, canned"} {:name "Canned Beans"}] "Beans")
 
 (defn update-food-search [app-state text]
+  (set-title! (str "Keto or Nah? - Search - " text))
   (swap! app-state merge {:querying? true :search-items [] :search-text text})
   (.setTimeout js/window
                (fn []

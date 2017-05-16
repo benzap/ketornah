@@ -15,6 +15,29 @@
 (def bar-protein-color "#dce775")
 (def bar-fat-color "#fff176")
 
+(defn append-tooltip! [classname text]
+  (-> js/d3
+      (.select "body")
+      (.append "div")
+      (.attr "class" (str "search-result-tooltip " classname))
+      (.style "position" "absolute")
+      (.style "z-index" 10)
+      (.style "visibility" "hidden")
+      (.text text)))
+
+(defn attach-tooltip! [root tooltip]
+  (-> root
+      (.on "mouseover" (fn [] (-> tooltip (.style "visibility" "visible"))))
+      (.on "mousemove" (fn [] (let [page-x (aget js/d3 "event" "pageX")
+                                    page-y (aget js/d3 "event" "pageY")
+                                    left (+ page-x 10)
+                                    top (- page-y 10)]
+                                (-> tooltip 
+                                    (.style "top" (str top "px"))
+                                    (.style "left" (str left "px"))))))
+      (.on "mouseout" (fn [] (-> tooltip (.style "visibility" "hidden")))))
+  root)
+
 (def mixin-render-result-bar
   {:did-mount
    (fn [state]
@@ -23,13 +46,28 @@
            bar-element (.querySelector dom-node ".search-result-bar")
            data-unparsed (.getAttribute bar-element "data-nutr-values")
            [carbs protein fat] (str/split data-unparsed ",")
-           svg-element (-> js/d3 (.select bar-element) (.append "svg"))]
+           carbs (.parseFloat js/window carbs)
+           protein (.parseFloat js/window protein)
+           fat (.parseFloat js/window fat)
+           svg-element (-> js/d3 (.select bar-element) (.append "svg"))
+           
+           ;;Tooltips
+           carb-tooltip (append-tooltip!
+                         "search-result-tooltip-carbs"
+                         (str (.toFixed carbs 1) "% Carbs"))
+           protein-tooltip (append-tooltip!
+                            "search-result-tooltip-protein"
+                            (str (.toFixed protein 1) "% Protein"))
+           fat-tooltip (append-tooltip!
+                        "search-result-tooltip-fat"
+                        (str (.toFixed fat 1) "% Fat"))
+           ]
 
        ;; Style svg element
        (-> svg-element
            (.style "background-color" bar-excess-color)
            (.style "border-radius" "5px")
-           (.style "border" "3px solid #1d1d1d")
+           (.style "border" "2px solid #1d1d1d")
            (.attr "width" "100%")
            (.attr "height" bar-height))
 
@@ -40,7 +78,8 @@
            (.attr "y" 0)
            (.attr "width" (str carbs "%"))
            (.attr "height" bar-height)
-           (.attr "fill" bar-carbs-color))
+           (.attr "fill" bar-carbs-color)
+           (attach-tooltip! carb-tooltip))
 
        ;; Add Protein bar
        (-> svg-element
@@ -49,19 +88,21 @@
            (.attr "y" 0)
            (.attr "width" (str protein "%"))
            (.attr "height" bar-height)
-           (.attr "fill" bar-protein-color))
+           (.attr "fill" bar-protein-color)
+           (attach-tooltip! protein-tooltip))
        
        ;; Add Fat bar
        (-> svg-element
            (.append "rect")
-           (.attr "x" (str (+ (.parseFloat js/window carbs) (.parseFloat js/window protein)) "%"))
+           (.attr "x" (str (+ carbs protein) "%"))
            (.attr "y" 0)
            (.attr "width" (str fat "%"))
            (.attr "height" bar-height)
-           (.attr "fill" bar-fat-color))
-
-
-)
+           (.attr "fill" bar-fat-color)
+           (attach-tooltip! fat-tooltip))
+       
+       
+       )
      state)})
 
 (rum/defcs c-search-result <

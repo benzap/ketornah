@@ -154,3 +154,13 @@ h1 {
   font-style: italic;
   font-weight: bold;
 }
+
+.search-result-tooltip {
+  background-color: #1d1d1d;
+  color: #fdfdfd;
+  padding-left: 7px;
+  padding-right: 7px;
+  height: 20px;
+  text-align: center;
+  border-radius: 5px;
+}

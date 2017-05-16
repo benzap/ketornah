@@ -22,5 +22,10 @@
   "Set the location hash of a js/window object." 
   (aset js/window "location" "hash" v))
 
+(defn set-title! [s]
+  (aset js/document "title" s))
+
+#_(set-title! "Testing")
+
 (defn wait-for-database [app-state]
   (while (:loading? @app-state)))

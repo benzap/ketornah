@@ -113,4 +113,12 @@
   [:.search-querying
    {:font-size (px 42)
     :font-style "italic"
-    :font-weight "bold"}])
+    :font-weight "bold"}]
+  [:.search-result-tooltip
+   {:background-color "#1d1d1d"
+    :color "#fdfdfd"
+    :padding-left (px 7)
+    :padding-right (px 7)
+    :height (px 20)
+    :text-align "center"
+    :border-radius (px 5)}])
