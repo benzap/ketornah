@@ -138,7 +138,7 @@
     [:.search-container
      [:.search-input
       [:input {:type "text"
-               :placeholder "Search Food"
+               :placeholder "Search Food ↵"
                :value search-text
                :disabled querying?
                :on-change

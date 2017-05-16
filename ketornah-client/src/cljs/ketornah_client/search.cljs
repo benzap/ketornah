@@ -86,4 +86,4 @@
                    (swap! app-state merge {:search-items (-> (sql/search-food database text)
                                                              (process-costs text))
                                            :querying? false})
-                   (.timeEnd js/console "Search Query"))) 500))
+                   (.timeEnd js/console "Search Query"))) 600))
