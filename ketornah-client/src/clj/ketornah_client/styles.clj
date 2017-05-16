@@ -27,8 +27,27 @@
     :width "100%"
     :background-color (rgb 240 240 240)
     :margin 0}]
+  [:#ketornah-main-header>span
+   {:position "absolute"
+    :top (px 4)
+    :left (px 5)
+    :width (px 48)
+    :height (px 48)}]
   [:#ketornah-main-header>h1
    {:font-size (px 48)}]
+  [:#ketornah-main-header>a
+   {:position "absolute"
+    :top 0
+    :right 0
+    :padding-right (px 5)
+    :font-size (px 48)
+    :height (px 56)
+    :line-height (px 56)
+    }]
+  [:#ketornah-main-header>a>i
+   {:font-size (px 48)
+    :height (px 56)
+    :line-height (px 56)}]
   [:#app
    {:display "flex"
     :align-content "center"
