@@ -26,6 +26,9 @@ ketornah_client.utils.set_hash_BANG_ = (function ketornah_client$utils$set_hash_
 
 return (window["location"]["hash"] = v);
 });
+ketornah_client.utils.set_title_BANG_ = (function ketornah_client$utils$set_title_BANG_(s){
+return (document["title"] = s);
+});
 ketornah_client.utils.wait_for_database = (function ketornah_client$utils$wait_for_database(app_state){
 while(true){
 if(cljs.core.truth_(new cljs.core.Keyword(null,"loading?","loading?",1905707049).cljs$core$IFn$_invoke$arity$1(cljs.core.deref.call(null,app_state)))){
