@@ -18,11 +18,11 @@ var map__37823 = p__37820;
 var map__37823__$1 = ((((!((map__37823 == null)))?((((map__37823.cljs$lang$protocol_mask$partition0$ & (64))) || ((cljs.core.PROTOCOL_SENTINEL === map__37823.cljs$core$ISeq$)))?true:false):false))?cljs.core.apply.call(null,cljs.core.hash_map,map__37823):map__37823);
 var food = map__37823__$1;
 var name = cljs.core.get.call(null,map__37823__$1,new cljs.core.Keyword(null,"name","name",1843675177));
-if(cljs.core.truth_(cuerdas.core.starts_with_QMARK_.call(null,name,[cljs.core.str.cljs$core$IFn$_invoke$arity$1(cuerdas.core.title.call(null,search_term)),cljs.core.str.cljs$core$IFn$_invoke$arity$1(",")].join('')))){
+if(cljs.core.truth_(cuerdas.core.starts_with_QMARK_.call(null,cuerdas.core.lower.call(null,name),[cljs.core.str.cljs$core$IFn$_invoke$arity$1(cuerdas.core.lower.call(null,search_term)),cljs.core.str.cljs$core$IFn$_invoke$arity$1(",")].join('')))){
 return ketornah_client.search._STAR__cost.call(null,food,1.5);
 } else {
-if(cljs.core.truth_(cuerdas.core.starts_with_QMARK_.call(null,name,[cljs.core.str.cljs$core$IFn$_invoke$arity$1(cuerdas.core.title.call(null,search_term))].join('')))){
-return ketornah_client.search._STAR__cost.call(null,food,1.2);
+if(cljs.core.truth_(cuerdas.core.starts_with_QMARK_.call(null,cuerdas.core.lower.call(null,name),[cljs.core.str.cljs$core$IFn$_invoke$arity$1(cuerdas.core.lower.call(null,search_term))].join('')))){
+return ketornah_client.search._STAR__cost.call(null,food,1.3);
 } else {
 return ketornah_client.search._STAR__cost.call(null,food,1.0);
 
@@ -47,11 +47,10 @@ return ketornah_client.search.modifier_index_of.call(null,ketornah_client.search
 });
 ketornah_client.search.search_text_cost = (function ketornah_client$search$search_text_cost(food,search_text){
 var search_terms = ketornah_client.search.search_terms.call(null,search_text);
-var _ = cljs.core.println.call(null,search_text,"-->",search_terms);
-var new_cost = cljs.core.apply.call(null,cljs.core._STAR_,cljs.core.map.call(null,new cljs.core.Keyword(null,"cost","cost",-1094861735),cljs.core.map.call(null,((function (search_terms,_){
+var new_cost = cljs.core.apply.call(null,cljs.core._STAR_,cljs.core.map.call(null,new cljs.core.Keyword(null,"cost","cost",-1094861735),cljs.core.map.call(null,((function (search_terms){
 return (function (p1__37830_SHARP_){
 return ketornah_client.search.apply_modifiers.call(null,food,p1__37830_SHARP_);
-});})(search_terms,_))
+});})(search_terms))
 ,search_terms,search_terms)));
 return cljs.core.assoc.call(null,food,new cljs.core.Keyword(null,"cost","cost",-1094861735),new_cost);
 });
