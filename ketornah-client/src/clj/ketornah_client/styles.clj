@@ -20,8 +20,11 @@
    {:height "100%"
     :width "100%"}]
   [:#ketornah-main-header
-   {:text-align "center"
+   {:position "fixed"
+    :text-align "center"
     :height (px 56)
+    :top 0
+    :width "100%"
     :background-color (rgb 240 240 240)
     :margin 0}]
   [:#ketornah-main-header>h1
@@ -30,7 +33,9 @@
    {:display "flex"
     :align-content "center"
     :justify-content "center"
-    :margin (px 18)}]
+    :overflow "hidden"
+    :margin (px 18)
+    :margin-top (px 82)}]
   [:h1
    {:text-decoration "none"
     :margin 0}]

@@ -20,7 +20,8 @@
                  [lambdaisland/garden-watcher "0.3.1"]
                  [org.clojure/core.async "0.3.442"]
                  [funcool/cuerdas "2.0.3"]
-                 [servant "0.1.5"]]
+                 [servant "0.1.5"]
+                 [secretary "1.2.3"]]
 
   :plugins [[lein-cljsbuild "1.1.5"]
             [lein-environ "1.1.0"]]

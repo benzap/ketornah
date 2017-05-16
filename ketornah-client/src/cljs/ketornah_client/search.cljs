@@ -26,10 +26,10 @@
 (defn modifier-starts-with
   [{:keys [name] :as food} search-term]
   (cond 
-    (str/starts-with? name (str (str/title search-term) ","))
+    (str/starts-with? (str/lower name) (str (str/lower search-term) ","))
     (*-cost food 1.5)
-    (str/starts-with? name (str (str/title search-term)))
-    (*-cost food 1.2)
+    (str/starts-with? (str/lower name) (str (str/lower search-term)))
+    (*-cost food 1.3)
     :else
     (*-cost food 1.0)))
 
@@ -51,7 +51,6 @@
 
 (defn search-text-cost [food search-text]
   (let [search-terms (search-terms search-text)
-        _ (println search-text "-->" search-terms)
         new-cost
         (->> search-terms
              (map #(apply-modifiers food %) search-terms)
