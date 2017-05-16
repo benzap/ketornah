@@ -1,6 +1,8 @@
 (ns ketornah-client.search
   (:require [cuerdas.core :as str]
-            [clojure.string :refer [index-of]]))
+            [clojure.string :refer [index-of]]
+            [ketornah-client.sql :as sql]
+            [ketornah-client.utils :refer [wait-for-database]]))
 
 (defn init-food-cost [food]
   (assoc food :cost 1.0))
@@ -72,3 +74,15 @@
        sort-search-items))
 
 #_(process-costs [{:name "Beans, canned"} {:name "Canned Beans"}] "Beans")
+
+(defn update-food-search [app-state text]
+  (swap! app-state merge {:querying? true :search-items [] :search-text text})
+  (.setTimeout js/window
+               (fn []
+                 (wait-for-database app-state)
+                 (let [{:keys [database]} @app-state]
+                   (.time js/console "Search Query")
+                   (swap! app-state merge {:search-items (-> (sql/search-food database text)
+                                                             (process-costs text))
+                                           :querying? false})
+                   (.timeEnd js/console "Search Query"))) 500))

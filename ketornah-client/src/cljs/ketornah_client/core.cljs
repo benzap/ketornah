@@ -1,15 +1,26 @@
 (ns ketornah-client.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [goog.functions]
+            [goog.events]
+            [goog.history.EventType :as EventType]
             [rum.core :as rum]
             [cljs.core.async :refer [chan put! <! >!]]
+            [secretary.core :as secretary :refer-macros [defroute]]
+
+            ;; Local
             [ketornah-client.sql :as sql]
+            [ketornah-client.search :as search]
+            [ketornah-client.utils :refer [set-hash! gen-query-params]]
+
+            ;; Rum Components
             [ketornah-client.components.search :refer [c-search]]
             [ketornah-client.components.result :refer [c-result]]
-            [ketornah-client.components.loading :refer [c-loading]]))
+            [ketornah-client.components.loading :refer [c-loading]])
+  (:import goog.History))
 
 (enable-console-print!)
 
+;; Main Application State
 (defonce app-state
   (atom
    {:database nil
@@ -20,6 +31,21 @@
     :search-selected nil
     :worker-channel nil}))
 
+;; Secretary Configuration
+(secretary/set-config! :prefix "#")
+
+;; Secretary Routes
+(defroute search-query "/search/:query"
+  [query query-params]
+  (search/update-food-search app-state (.decodeURIComponent js/window query)))
+
+(defroute default-route "*" [])
+
+;; Quick and dirty history configuration.
+(let [h (History.)]
+  (goog.events/listen h EventType/NAVIGATE #(secretary/dispatch! (.-token %)))
+  (doto h (.setEnabled true)))
+
 (defn mixin-load-database []
   {:did-mount
    (fn [state]
@@ -28,7 +54,7 @@
              (swap! app-state merge {:database db :loading? false})))
        state))})
 
-(rum/defcs main-app < 
+(rum/defcs main-app <
   rum/reactive
   (mixin-load-database)
   [state app-state]

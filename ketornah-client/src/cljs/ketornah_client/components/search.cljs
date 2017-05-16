@@ -6,7 +6,8 @@
             [cuerdas.core :as str]
             [ketornah-client.sql :as sql]
             [ketornah-client.food :as food]
-            [ketornah-client.search :as search]))
+            [ketornah-client.search :as search]
+            [ketornah-client.utils :refer [set-hash!]]))
 
 (def bar-height 20)
 (def bar-excess-color "#64b5f6")
@@ -63,17 +64,6 @@
 )
      state)})
 
-(defn update-food-search [app-state text]
-  (let [{:keys [database]} @app-state]
-    (swap! app-state merge {:querying? true :search-items [] :search-text text})
-    (.setTimeout js/window
-                 (fn []
-                   (.time js/console "Search Query")
-                   (swap! app-state merge {:search-items (-> (sql/search-food database text)
-                                                             (search/process-costs text))
-                                           :querying? false})
-                   (.timeEnd js/console "Search Query")) 500)))
-
 (rum/defcs c-search-result <
   {:key-fn (fn [food] (str (:name food)))}
   mixin-render-result-bar
@@ -100,29 +90,28 @@
      :did-update focus-input}))
 
 (rum/defcs c-search <
-  (rum/local "" ::search-text)
   mixin-fix-focus
   rum/reactive
   [state app-state]
-  (let [{:keys [search-items querying?]} (rum/react app-state)
-        a-search-text (::search-text state)
-        ]
+  (let [{:keys [search-text search-items querying?]} (rum/react app-state)]
     [:.search-container
      [:.search-input
       [:input {:type "text"
                :placeholder "Search Food"
-               :value @a-search-text
+               :value search-text
                :disabled querying?
                :on-change
                (fn [e]
                  (let [text (-> e .-target .-value)
                        text (if-not (str/ends-with? text " ") (str/title text) text)]
-                   (reset! a-search-text text)))
+                   (swap! app-state assoc :search-text text)))
                :on-key-down
                (fn [e]
                  (let [key (-> e .-key)]
                    (when (= key "Enter")
-                     (update-food-search app-state @a-search-text))
+                     (set-hash! (str "/search/" (.encodeURIComponent js/window search-text)))
+                     ;;(search/update-food-search app-state search-text)
+                     )
                    ))}]]
      [:.search-results
       (cond
