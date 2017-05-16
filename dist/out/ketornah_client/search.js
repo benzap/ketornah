@@ -65,6 +65,8 @@ return ketornah_client.search.search_text_cost.call(null,p1__41271_SHARP_,search
 }),cljs.core.map.call(null,ketornah_client.search.init_food_cost,search_items)));
 });
 ketornah_client.search.update_food_search = (function ketornah_client$search$update_food_search(app_state,text){
+ketornah_client.utils.set_title_BANG_.call(null,[cljs.core.str.cljs$core$IFn$_invoke$arity$1("Keto or Nah? - Search - "),cljs.core.str.cljs$core$IFn$_invoke$arity$1(text)].join(''));
+
 cljs.core.swap_BANG_.call(null,app_state,cljs.core.merge,new cljs.core.PersistentArrayMap(null, 3, [new cljs.core.Keyword(null,"querying?","querying?",1078116512),true,new cljs.core.Keyword(null,"search-items","search-items",731653300),cljs.core.PersistentVector.EMPTY,new cljs.core.Keyword(null,"search-text","search-text",1559451259),text], null));
 
 return window.setTimeout((function (){
@@ -78,5 +80,5 @@ console.time("Search Query");
 cljs.core.swap_BANG_.call(null,app_state,cljs.core.merge,new cljs.core.PersistentArrayMap(null, 2, [new cljs.core.Keyword(null,"search-items","search-items",731653300),ketornah_client.search.process_costs.call(null,ketornah_client.sql.search_food.call(null,database,text),text),new cljs.core.Keyword(null,"querying?","querying?",1078116512),false], null));
 
 return console.timeEnd("Search Query");
-}),(500));
+}),(600));
 });
