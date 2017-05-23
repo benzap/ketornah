@@ -22,10 +22,11 @@
   [:#ketornah-main-header
    {:position "fixed"
     :text-align "center"
+    :z-index 999
     :height (px 56)
     :top 0
     :width "100%"
-    :background-color (rgb 240 240 240)
+    :background-color (rgba 240 240 240 0.5)
     :margin 0}]
   [:#ketornah-main-header>span
    {:position "absolute"
@@ -66,7 +67,7 @@
     :justify-content "center"
     :margin-bottom (px 13)}]
   [:.search-input>input
-   {:width (px 400)
+   {:min-width (px 400)
     :height (px 50)
     :font-size (px 42)
     :text-align "center"

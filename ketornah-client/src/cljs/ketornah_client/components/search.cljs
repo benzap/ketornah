@@ -38,6 +38,10 @@
       (.on "mouseout" (fn [] (-> tooltip (.style "visibility" "hidden")))))
   root)
 
+(defn remove-tooltips-from-body []
+  (let [tooltip-elems (.querySelectorAll js/document ".search-result-tooltip")]
+    (.forEach tooltip-elems (fn [elem] (.remove elem)))))
+
 (def mixin-render-result-bar
   {:did-mount
    (fn [state]
@@ -110,7 +114,8 @@
   mixin-render-result-bar
   [state {:keys [name carbs protein fat fibre category] :as food}]
   (let [{:keys [carbs protein fat]} (food/process-percent-ratios food)]
-    [:.search-result {:class (-> (food/process-keto-index food) str/kebab)}
+    [:.search-result.animated.fadeInUp
+     {:class (-> (food/process-keto-index food) str/kebab)}
      [:.search-result-title name]
      [:.search-result-category category]
      [:.search-result-values
@@ -137,27 +142,35 @@
   (let [{:keys [search-text search-items querying?]} (rum/react app-state)]
     [:.search-container
      [:.search-input
-      [:input {:type "text"
-               :placeholder "Search Food ↵"
-               :value search-text
-               :disabled querying?
-               :on-change
-               (fn [e]
-                 (let [text (-> e .-target .-value)
-                       text (if-not (str/ends-with? text " ") (str/title text) text)]
-                   (swap! app-state assoc :search-text text)))
-               :on-key-down
-               (fn [e]
-                 (let [key (-> e .-key)]
-                   (when (= key "Enter")
-                     (set-hash! (str "/search/" (.encodeURIComponent js/window search-text)))
-                     ;;(search/update-food-search app-state search-text)
-                     )
-                   ))}]]
+      [:input
+       {:type "text"
+        :placeholder "Search Food ↵"
+        :value search-text
+        :disabled querying?
+        :on-change
+        (fn [e]
+          (let [text (-> e .-target .-value)
+                text (if-not (str/ends-with? text " ") (str/title text) text)]
+            (swap! app-state assoc :search-text text)))
+        :on-key-down
+        (fn [e]
+          (let [key (-> e .-key)
+                target (-> e .-target)]
+            (when (= key "Enter")
+              (set-hash! (str "/search/" (.encodeURIComponent js/window search-text)))
+              (.setSelectionRange target 0 (-> target .-value .-length))
+              (remove-tooltips-from-body)
+              ;;(search/update-food-search app-state search-text)
+              )
+            ))
+        :on-click
+        (fn [e]
+          (let [target (-> e .-target)]
+            (.setSelectionRange target 0 (-> target .-value .-length))))}]]
      [:.search-results
       (cond
         querying?
-        [:.search-querying "Querying..."]
+        [:.search-querying.animated.pulse "Querying..."]
         (not (empty? search-items))
         (for [item search-items] (c-search-result item))
         :else
