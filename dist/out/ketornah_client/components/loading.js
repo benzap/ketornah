@@ -3,5 +3,5 @@ goog.provide('ketornah_client.components.loading');
 goog.require('cljs.core');
 goog.require('rum.core');
 ketornah_client.components.loading.c_loading = rum.core.build_defcs.call(null,(function (state,app_state){
-return React.createElement("div",({"className": "progress-spinner"}),"Loading Database...");
+return React.createElement("div",({"className": "progress-spinner animated pulse"}),"Loading Database...");
 }),null,"c-loading");
