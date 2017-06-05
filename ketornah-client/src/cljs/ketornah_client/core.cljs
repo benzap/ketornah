@@ -10,7 +10,7 @@
             ;; Local
             [ketornah-client.sql :as sql]
             [ketornah-client.search :as search]
-            [ketornah-client.utils :refer [set-hash! gen-query-params]]
+            [ketornah-client.utils :refer [set-hash! gen-query-params remove-tooltips-from-body]]
 
             ;; Rum Components
             [ketornah-client.components.search :refer [c-search]]
@@ -68,3 +68,17 @@
       (c-result app-state))))
 
 (rum/mount (main-app app-state) (. js/document (getElementById "app")))
+
+(when-let [main-logo (.querySelector js/document "#ketornah-main-logo-scroll")]
+  (.addEventListener
+   main-logo "click"
+   (fn [e]
+     (let [elem (.querySelector js/document "body")
+           input (.querySelector js/document ".search-input>input")]
+       (aset elem "scrollTop" 0)
+       (swap! app-state assoc
+              :search-text ""
+              :search-items []
+              :search-selected nil)
+       (remove-tooltips-from-body)
+       (.focus input)))))

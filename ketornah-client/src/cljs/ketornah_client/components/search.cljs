@@ -7,7 +7,7 @@
             [ketornah-client.sql :as sql]
             [ketornah-client.food :as food]
             [ketornah-client.search :as search]
-            [ketornah-client.utils :refer [set-hash!]]))
+            [ketornah-client.utils :refer [set-hash! remove-tooltips-from-body]]))
 
 (def bar-height 20)
 (def bar-excess-color "#64b5f6")
@@ -38,9 +38,6 @@
       (.on "mouseout" (fn [] (-> tooltip (.style "visibility" "hidden")))))
   root)
 
-(defn remove-tooltips-from-body []
-  (let [tooltip-elems (.querySelectorAll js/document ".search-result-tooltip")]
-    (.forEach tooltip-elems (fn [elem] (.remove elem)))))
 
 (def mixin-render-result-bar
   {:did-mount
@@ -119,9 +116,9 @@
      [:.search-result-title name]
      [:.search-result-category category]
      [:.search-result-values
-      [:.search-result-carbs (str (.toFixed carbs 1) "% Carbs")]
-      [:.search-result-protein (str (.toFixed protein 1) "% Protein")]
-      [:.search-result-fat (str (.toFixed fat 1) "% Fat")]
+      [:.search-result-metric.search-result-carbs (str (.toFixed carbs 1) "% Carbs")]
+      [:.search-result-metric.search-result-protein (str (.toFixed protein 1) "% Protein")]
+      [:.search-result-metric.search-result-fat (str (.toFixed fat 1) "% Fat")]
       [:.search-result-bar {:data-nutr-values (str carbs "," protein "," fat)}]]]))
 
 (def mixin-fix-focus

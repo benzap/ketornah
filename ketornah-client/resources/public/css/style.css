@@ -16,13 +16,14 @@ body {
 }
 
 #ketornah-main-header {
-  position: fixed;
+  line-height: 56px;
   text-align: center;
-  z-index: 999;
-  height: 56px;
   top: 0;
-  width: 100%;
   background-color: hsla(0, 0%, 94.117645%, 0.5);
+  width: 100%;
+  z-index: 999;
+  position: fixed;
+  height: 56px;
   margin: 0;
 }
 
@@ -36,6 +37,14 @@ body {
 
 #ketornah-main-header>h1 {
   font-size: 48px;
+}
+
+@media (max-width: 550px) {
+
+  #ketornah-main-header>h1 {
+    font-size: 30px;
+  }
+
 }
 
 #ketornah-main-header>a {
@@ -97,6 +106,15 @@ h1 {
   border-bottom: 4px solid #2d2d2d;
 }
 
+@media (max-width: 550px) {
+
+  .search-input>input {
+    min-width: 260px;
+    font-size: 30px;
+  }
+
+}
+
 .search-results {
   display: flex;
   align-content: center;
@@ -129,10 +147,32 @@ h1 {
 .search-result-values {
   display: flex;
   padding: 7px;
+  flex-grow: 2;
+}
+
+.search-result-metric {
+  padding: 3px;
+}
+
+@media (max-width: 550px) {
+
+  .search-result {
+    margin: 10px;
+  }
+  
+  .search-result-values {
+    font-size: 10px;
+  }
+  
+  .search-result-metric {
+    flex-grow: 1;
+  }
+
 }
 
 .search-result-bar {
   display: flex;
+  flex-shrink: 1;
   flex-direction: column;
   justify-content: center;
   align-items: center;

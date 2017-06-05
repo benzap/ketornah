@@ -29,3 +29,7 @@
 
 (defn wait-for-database [app-state]
   (while (:loading? @app-state)))
+
+(defn remove-tooltips-from-body []
+  (let [tooltip-elems (.querySelectorAll js/document ".search-result-tooltip")]
+    (.forEach tooltip-elems (fn [elem] (.remove elem)))))
