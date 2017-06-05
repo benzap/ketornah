@@ -39,3 +39,11 @@ return null;
 break;
 }
 });
+ketornah_client.utils.remove_tooltips_from_body = (function ketornah_client$utils$remove_tooltips_from_body(){
+var tooltip_elems = document.querySelectorAll(".search-result-tooltip");
+return tooltip_elems.forEach(((function (tooltip_elems){
+return (function (elem){
+return elem.remove();
+});})(tooltip_elems))
+);
+});
